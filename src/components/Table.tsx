@@ -76,6 +76,22 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                         color = 'bg-green-100';
                     }
                 }
+            } else if (colKey === 'phone') {
+                const phoneRegex = /^[0-9\s\(\)-]+$/;
+
+                if (!phoneRegex.test(value)) {
+                    color = 'bg-red-100';
+                    errorMessage = 'Phone number contains invalid characters';
+                } else {
+                    const digitCount = (value.match(/\d/g) || []).length;
+
+                    if (digitCount < 7) {
+                        color = 'bg-red-100';
+                        errorMessage = 'Phone number must contain at least 7 digits';
+                    } else {
+                        color = 'bg-green-100';
+                    }
+                }
             } else {
                 color = 'bg-green-100';
             }
@@ -135,8 +151,13 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                         {Object.keys(data[0] || {}).filter(key => key !== 'id').map((key, index) => (
                             <th
                                 key={index}
-                                className="p-4 hover:bg-gray-200 hover:cursor-pointer relative group w-1/5"
-                                onClick={() => handleSort(key as keyof TableRow)}
+                                className={`p-4 relative hover:bg-gray-200 group w-1/5 ${cellColors.size > 0 ? 'cursor-not-allowed' : 'hover:cursor-pointer'}`}
+                                onClick={() => {
+                                    if (cellColors.size === 0) {
+                                        handleSort(key as keyof TableRow);
+                                    }
+                                }}
+                                style={{ pointerEvents: cellColors.size > 0 ? 'none' : 'auto' }}
                             >
                                 <span className="flex items-center text-gray-700">
                                     {convertKeyToLabel(key)}

@@ -1,0 +1,37 @@
+[
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "position": "Manager",
+    "phone": "123-456-7891",
+    "email": "john.doe@example.com"
+  },
+  {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "position": "Developer",
+    "phone": "987-654-3210",
+    "email": "jane.smith@example.com"
+  },
+  {
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "position": "Designer",
+    "phone": "456-123-7890",
+    "email": "alice.johnson@example.com"
+  },
+  {
+    "firstName": "Bob",
+    "lastName": "Brown",
+    "position": "Analyst",
+    "phone": "321-654-9870",
+    "email": "bob.brown@example.com"
+  },
+  {
+    "firstName": "Eve",
+    "lastName": "Davis",
+    "position": "Intern",
+    "phone": "789-123-4560",
+    "email": "eve.davis@example.com"
+  }
+]

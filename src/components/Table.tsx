@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaLongArrowAltDown, FaLongArrowAltUp } from 'react-icons/fa';
 
 interface TableRow {
@@ -11,24 +11,25 @@ interface TableRow {
     email: string;
 }
 
-const initialTableData: TableRow[] = [
-    { firstName: 'John', lastName: 'Doe', position: 'Developer', phone: '123-456-7890', email: 'john@example.com' },
-    { firstName: 'Jane', lastName: 'Smith', position: 'Designer', phone: '987-654-3210', email: 'jane@example.com' },
-    { firstName: 'Mike', lastName: 'Johnson', position: 'Manager', phone: '555-555-5555', email: 'mike@example.com' },
-    { firstName: 'Emily', lastName: 'Davis', position: 'Analyst', phone: '111-222-3333', email: 'emily@example.com' },
-    { firstName: 'David', lastName: 'Brown', position: 'Engineer', phone: '444-666-7777', email: 'david@example.com' },
-];
-
 const Table: React.FC = () => {
-    const [tableData, setTableData] = useState<TableRow[]>(initialTableData);
+    const [data, setData] = useState<TableRow[]>([]);
     const [sortedColumn, setSortedColumn] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+    const [editingCell, setEditingCell] = useState<{ row: number; col: keyof TableRow } | null>(null);
+
+    const handleCellClick = (rowIndex: number, colKey: keyof TableRow) => {
+        setEditingCell({ row: rowIndex, col: colKey });
+    };
+
+    const handleBlur = () => {
+        setEditingCell(null);
+    };
 
     const handleSort = (column: keyof TableRow) => {
         const isAscending = sortedColumn === column && sortDirection === 'asc';
         const newDirection = isAscending ? 'desc' : 'asc';
 
-        const sortedData = [...tableData].sort((a, b) => {
+        const sortedData = [...data].sort((a, b) => {
             if (a[column] < b[column]) {
                 return newDirection === 'asc' ? -1 : 1;
             }
@@ -38,10 +39,56 @@ const Table: React.FC = () => {
             return 0;
         });
 
-        setTableData(sortedData);
+        setData(sortedData);
         setSortedColumn(column);
         setSortDirection(newDirection);
     };
+
+    const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>, rowIndex: number, colKey: keyof TableRow) => {
+        const newValue = event.target.value;
+
+        const newData = [...data];
+        newData[rowIndex] = { ...newData[rowIndex], [colKey]: newValue };
+        setData(newData);
+
+        try {
+            const response = await fetch('/api/update-table-data', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    rowIndex,
+                    colKey,
+                    value: newValue,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to update data: ${errorText}`);
+            }
+
+            console.log('Data updated successfully');
+        } catch (error) {
+            console.error('Error updating data:', error);
+        }
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('/api/table-data');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const result: TableRow[] = await response.json();
+                setData(result);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <div className="overflow-x-auto">
@@ -57,7 +104,7 @@ const Table: React.FC = () => {
                         ].map(({ header, key }, index) => (
                             <th
                                 key={index}
-                                className="p-4 hover:bg-gray-200 hover:cursor-pointer relative group"
+                                className="p-4 hover:bg-gray-200 hover:cursor-pointer relative group w-1/5"
                                 onClick={() => handleSort(key as keyof TableRow)}
                             >
                                 <span className="flex items-center text-gray-700">
@@ -75,13 +122,28 @@ const Table: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {tableData.map((row, index) => (
-                        <tr key={index} className="border border-gray-300">
-                            <td className="p-4">{row.firstName}</td>
-                            <td className="p-4">{row.lastName}</td>
-                            <td className="p-4">{row.position}</td>
-                            <td className="p-4">{row.phone}</td>
-                            <td className="p-4">{row.email}</td>
+                    {data.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="border border-gray-300">
+                            {(['firstName', 'lastName', 'position', 'phone', 'email'] as (keyof TableRow)[]).map((colKey) => (
+                                <td
+                                    key={colKey}
+                                    className={`p-4 cursor-pointer ${editingCell?.row === rowIndex && editingCell.col === colKey ? 'border-b-2 border-sky-400' : ''}`}
+                                    onClick={() => handleCellClick(rowIndex, colKey)}
+                                >
+                                    {editingCell?.row === rowIndex && editingCell.col === colKey ? (
+                                        <input
+                                            type="text"
+                                            value={row[colKey]}
+                                            onChange={(e) => handleInputChange(e, rowIndex, colKey)}
+                                            onBlur={handleBlur}
+                                            className="w-full h-full outline-none"
+                                            autoFocus
+                                        />
+                                    ) : (
+                                        row[colKey]
+                                    )}
+                                </td>
+                            ))}
                         </tr>
                     ))}
                 </tbody>

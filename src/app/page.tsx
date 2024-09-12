@@ -17,6 +17,11 @@ const Home: React.FC = () => {
     const [data, setData] = useState<TableRow[]>([]);
     const [localData, setLocalData] = useState<TableRow[]>([]);
     const [loadingCells, setLoadingCells] = useState<Set<string>>(new Set());
+    const [errorMessages, setErrorMessages] = useState<Map<string, string>>(new Map());
+
+    const handleErrorMessagesUpdate = (newErrorMessages: Map<string, string>) => {
+        setErrorMessages(newErrorMessages);
+    };
 
     const getCellId = (rowIndex: number, colKey: keyof TableRow) => `${rowIndex}-${colKey}`;
 
@@ -135,14 +140,14 @@ const Home: React.FC = () => {
                 <button onClick={addRow}>
                     <FaPlus className="text-lg" />
                 </button>
-                <button onClick={handleSave}>
-                    <FaSave className="text-lg" />
+                <button onClick={handleSave} disabled={errorMessages.size > 0}>
+                    <FaSave className={`text-lg ${errorMessages.size > 0 ? "text-gray-400" : "text-black"}`} />
                 </button>
                 <button>
                     <FaArrowLeft className="text-lg" />
                 </button>
             </div>
-            <Table data={localData} setData={setLocalData} loadingCells={loadingCells} setLoadingCells={setLoadingCells} />
+            <Table data={localData} setData={setLocalData} loadingCells={loadingCells} onErrorMessagesUpdate={handleErrorMessagesUpdate} />
         </div>
     );
 };

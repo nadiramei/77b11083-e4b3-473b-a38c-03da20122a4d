@@ -16,10 +16,10 @@ interface TableProps {
     data: TableRow[];
     setData: React.Dispatch<React.SetStateAction<TableRow[]>>;
     loadingCells: Set<string>;
-    setLoadingCells: React.Dispatch<React.SetStateAction<Set<string>>>;
+    onErrorMessagesUpdate: (errorMessages: Map<string, string>) => void;
 }
 
-const Table: React.FC<TableProps> = ({ data, setData, loadingCells, setLoadingCells }) => {
+const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessagesUpdate }) => {
     const [sortedColumn, setSortedColumn] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [editingCell, setEditingCell] = useState<{ row: number; col: keyof TableRow } | null>(null);
@@ -96,6 +96,7 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, setLoadingCe
         setErrorMessages(prev => {
             const updated = new Map(prev);
             updated.set(cellId, errorMessage);
+            onErrorMessagesUpdate(updated);
             return updated;
         });
     };

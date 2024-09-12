@@ -55,8 +55,8 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
         let color = '';
         let errorMessage = '';
 
-        let errorColor = "bg-red-100 dark:bg-rose-500";
-        let successColor = "bg-green-100 dark:bg-emerald-600";
+        let errorColor = "bg-red-100 dark:bg-red-600";
+        let successColor = "bg-green-100 dark:bg-green-600";
 
         if (value == "") {
             color = errorColor;

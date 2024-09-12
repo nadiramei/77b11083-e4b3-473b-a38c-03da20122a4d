@@ -221,19 +221,19 @@ const Home: React.FC = () => {
 
             {isConfirmingDelete && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
-                    <div className="bg-white p-6 rounded shadow-lg">
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded shadow-lg">
                         <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
                         <p className="mb-4">Are you sure you want to delete the row with email address: <strong>{emailToDelete}</strong>? <br />This action cannot be undone.</p>
                         <div className="flex justify-end gap-4">
                             <button
                                 onClick={handleConfirmDelete}
-                                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                className="bg-red-500 dark:bg-red-600 text-white px-4 py-2 rounded hover:bg-red-600 hover:dark:bg-red-800"
                             >
                                 <b>Delete</b>
                             </button>
                             <button
                                 onClick={handleCancelDelete}
-                                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                                className="bg-gray-300 dark:bg-gray-700 hover:dark:bg-gray-500 px-4 py-2 rounded hover:bg-gray-400"
                             >
                                 Cancel
                             </button>

@@ -3,32 +3,16 @@
     "id": 1726174455817,
     "firstName": "John",
     "lastName": "Doe",
-    "position": "Software Engineer",
-    "phone": "555-1234",
-    "email": "john.doe@example.com"
-  },
-  {
-    "id": 1726174455818,
-    "firstName": "Jane",
-    "lastName": "Smith",
-    "position": "Product Manager",
-    "phone": "555-5678",
-    "email": "jane.smith@example.com"
-  },
-  {
-    "id": 1726174455819,
-    "firstName": "Alice",
-    "lastName": "Johnson",
-    "position": "UX Designer",
-    "phone": "555-8765",
-    "email": "alice.johnson@example.com"
+    "position": "CEO",
+    "phone": "555-1670",
+    "email": "john3@example.com"
   },
   {
     "id": 1726174455820,
     "firstName": "Bob",
     "lastName": "Brown",
     "position": "Data Analyst",
-    "phone": "555-4321",
+    "phone": "555-1600",
     "email": "bob.brown@example.com"
   },
   {

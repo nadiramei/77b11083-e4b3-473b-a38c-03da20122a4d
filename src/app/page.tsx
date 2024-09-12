@@ -2,7 +2,7 @@
 
 import Table from "@/components/Table";
 import { useEffect, useState } from "react";
-import { FaPlus, FaSave, FaArrowLeft } from 'react-icons/fa';
+import { FaPlus, FaSave, FaArrowLeft, FaSun, FaMoon } from 'react-icons/fa';
 
 interface TableRow {
     id: number;
@@ -22,6 +22,44 @@ const Home: React.FC = () => {
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
     const [rowToDelete, setRowToDelete] = useState<number | null>(null);
     const [emailToDelete, setEmailToDelete] = useState<string | null>(null);
+
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        // Check local storage for user preference
+        const savedMode = localStorage.getItem('darkMode');
+        return savedMode ? JSON.parse(savedMode) : false;
+    });
+
+    const toggleDarkMode = () => {
+        setIsDarkMode((prevMode: any) => {
+            const newMode = !prevMode;
+            localStorage.setItem('darkMode', JSON.stringify(newMode));
+            return newMode;
+        });
+    };
+
+    useEffect(() => {
+        // Apply dark mode classes to the body
+        document.body.classList.toggle('dark', isDarkMode);
+    }, [isDarkMode]);
+
+    const handleErrorMessagesUpdate = (newErrorMessages: Map<string, string>) => {
+        setErrorMessages(newErrorMessages);
+    };
+
+    const getCellId = (rowIndex: number, colKey: keyof TableRow) => `${rowIndex}-${colKey}`;
+
+    const addRow = () => {
+        const newRow: TableRow = {
+            id: Date.now(),
+            firstName: '',
+            lastName: '',
+            position: '',
+            phone: '',
+            email: '',
+        };
+
+        setLocalData(prevData => [newRow, ...prevData]);
+    };
 
     const handleDeleteClick = (rowIndex: number) => {
         const rowEmail = data[rowIndex]?.email || '';
@@ -59,25 +97,6 @@ const Home: React.FC = () => {
     const handleCancelDelete = () => {
         setIsConfirmingDelete(false);
         setRowToDelete(null);
-    };
-
-    const handleErrorMessagesUpdate = (newErrorMessages: Map<string, string>) => {
-        setErrorMessages(newErrorMessages);
-    };
-
-    const getCellId = (rowIndex: number, colKey: keyof TableRow) => `${rowIndex}-${colKey}`;
-
-    const addRow = () => {
-        const newRow: TableRow = {
-            id: Date.now(),
-            firstName: '',
-            lastName: '',
-            position: '',
-            phone: '',
-            email: '',
-        };
-
-        setLocalData(prevData => [newRow, ...prevData]);
     };
 
     const handleSave = async () => {
@@ -177,17 +196,27 @@ const Home: React.FC = () => {
 
     return (
         <div className="p-4">
-            <div className="flex flex-row justify-end gap-8 m-8">
-                <button onClick={addRow}>
-                    <FaPlus className="text-lg" />
+            <div className="flex flex-row justify-between">
+                <button
+                    onClick={toggleDarkMode}
+                    className="m-8 focus:outline-none"
+                >
+                    {isDarkMode ? <FaMoon className="text-lg" /> : <FaSun className="text-lg" />}
                 </button>
-                <button onClick={handleSave} disabled={errorMessages.size > 0}>
-                    <FaSave className={`text-lg ${errorMessages.size > 0 ? "text-gray-400" : "text-black"}`} />
-                </button>
-                <button>
-                    <FaArrowLeft className="text-lg" />
-                </button>
+
+                <div className="flex flex-row justify-end gap-8 m-8">
+                    <button onClick={addRow}>
+                        <FaPlus className="text-lg" />
+                    </button>
+                    <button onClick={handleSave} disabled={errorMessages.size > 0}>
+                        <FaSave className={`text-lg ${errorMessages.size > 0 ? "text-gray-400" : ""}`} />
+                    </button>
+                    <button>
+                        <FaArrowLeft className="text-lg" />
+                    </button>
+                </div>
             </div>
+
             <Table data={localData} setData={setLocalData} loadingCells={loadingCells} onErrorMessagesUpdate={handleErrorMessagesUpdate} handleDelete={handleDeleteClick} />
 
             {isConfirmingDelete && (
@@ -200,7 +229,7 @@ const Home: React.FC = () => {
                                 onClick={handleConfirmDelete}
                                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                             >
-                                Confirm
+                                <b>Delete</b>
                             </button>
                             <button
                                 onClick={handleCancelDelete}

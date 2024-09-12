@@ -55,8 +55,11 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
         let color = '';
         let errorMessage = '';
 
+        let errorColor = "bg-red-100 dark:bg-rose-500";
+        let successColor = "bg-green-100 dark:bg-emerald-600";
+
         if (value == "") {
-            color = 'bg-red-100';
+            color = errorColor;
             errorMessage = 'This field cannot be empty';
             setCellColors(prev => {
                 const updated = new Map(prev);
@@ -66,35 +69,35 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
         } else if (value !== originalValue) {
             if (colKey === 'email') {
                 if (!isValidEmail(value)) {
-                    color = 'bg-red-100';
+                    color = errorColor;
                     errorMessage = 'Email is invalid';
                 } else {
                     const emailExists = data.some((row, index) => row.email === value && index !== rowIndex);
                     if (emailExists) {
-                        color = 'bg-red-100';
+                        color = errorColor;
                         errorMessage = 'Email address is not unique';
                     } else {
-                        color = 'bg-green-100';
+                        color = successColor;
                     }
                 }
             } else if (colKey === 'phone') {
                 const phoneRegex = /^[0-9\s\(\)-]+$/;
 
                 if (!phoneRegex.test(value)) {
-                    color = 'bg-red-100';
+                    color = errorColor;
                     errorMessage = 'Phone number contains invalid characters';
                 } else {
                     const digitCount = (value.match(/\d/g) || []).length;
 
                     if (digitCount < 7) {
-                        color = 'bg-red-100';
+                        color = errorColor;
                         errorMessage = 'Phone number must contain at least 7 digits';
                     } else {
-                        color = 'bg-green-100';
+                        color = successColor;
                     }
                 }
             } else {
-                color = 'bg-green-100';
+                color = successColor;
             }
 
             setCellColors(prev => {
@@ -112,8 +115,15 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
 
         setErrorMessages(prev => {
             const updated = new Map(prev);
-            updated.set(cellId, errorMessage);
+
+            if (errorMessage === '') {
+                updated.delete(cellId);
+            } else {
+                updated.set(cellId, errorMessage);
+            }
+
             onErrorMessagesUpdate(updated);
+
             return updated;
         });
     };
@@ -148,11 +158,11 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
         <div className="overflow-x-auto">
             <table className="min-w-full border-collapse border border-gray-300">
                 <thead>
-                    <tr className="bg-gray-100 text-gray-500 text-left border border-gray-300">
+                    <tr className="bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-50 text-left border border-gray-300 dark:border-gray-600">
                         {Object.keys(data[0] || {}).filter(key => key !== 'id').map((key, index) => (
                             <th
                                 key={index}
-                                className={`p-4 relative hover:bg-gray-200 group w-1/5 ${cellColors.size > 0 ? 'cursor-not-allowed' : 'hover:cursor-pointer'}`}
+                                className={`p-4 relative hover:bg-gray-200 hover:dark:bg-slate-600 group w-1/5 ${cellColors.size > 0 ? 'cursor-not-allowed' : 'hover:cursor-pointer'}`}
                                 onClick={() => {
                                     if (cellColors.size === 0) {
                                         handleSort(key as keyof TableRow);
@@ -160,7 +170,7 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                                 }}
                                 style={{ pointerEvents: cellColors.size > 0 ? 'none' : 'auto' }}
                             >
-                                <span className="flex items-center text-gray-700">
+                                <span className="flex items-center">
                                     {convertKeyToLabel(key)}
                                     {sortedColumn === key && (
                                         sortDirection === 'asc' ? (
@@ -176,7 +186,7 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                 </thead>
                 <tbody>
                     {data.map((row, rowIndex) => (
-                        <tr key={rowIndex} className="border border-gray-300 h-16 group relative">
+                        <tr key={rowIndex} className="border border-gray-300 dark:border-gray-600 h-16 group relative">
                             {(['firstName', 'lastName', 'position', 'phone', 'email'] as (keyof TableRow)[]).map((colKey) => {
                                 const cellId = getCellId(rowIndex, colKey);
                                 const cellColor = cellColors.get(cellId) || '';
@@ -186,7 +196,7 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                                 return (
                                     <td
                                         key={colKey}
-                                        className={`relative p-4 cursor-pointer group ${editingCell?.row === rowIndex && editingCell.col === colKey ? 'border-b-2 border-sky-400' : ''} ${cellColor}`}
+                                        className={`relative p-4 cursor-pointer group dark:bg-slate-900 ${editingCell?.row === rowIndex && editingCell.col === colKey ? 'border-b-2 border-sky-400' : ''} ${cellColor}`}
                                         onClick={() => handleCellClick(rowIndex, colKey)}
                                     >
                                         {editingCell?.row === rowIndex && editingCell.col === colKey ? (
@@ -195,11 +205,11 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                                                 value={row[colKey]}
                                                 onChange={(e) => handleInputChange(e, rowIndex, colKey)}
                                                 onBlur={() => handleBlur(rowIndex, colKey, String(row[colKey]))}
-                                                className={`w-full h-full outline-none ${cellColor}`}
+                                                className={`w-full h-full outline-none bg-transparent ${cellColor}`}
                                                 autoFocus
                                             />
                                         ) : (
-                                            <>
+                                            <div className="group">
                                                 {row[colKey]}
                                                 {errorMessage && (
                                                     <div
@@ -211,10 +221,10 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                                                 )}
                                                 {isLoading && (
                                                     <div className="absolute right-2 inset-0 flex items-center justify-end">
-                                                        <div className="w-5 h-5 border-4 border-t-4 border-blue-500 border-t-transparent border-solid rounded-full animate-spin" />
+                                                        <div className="w-5 h-5 border-4 border-t-4 border-blue-500 dark:border-blue-200 border-t-transparent border-solid rounded-full animate-spin" />
                                                     </div>
                                                 )}
-                                            </>
+                                            </div>
                                         )}
                                     </td>
                                 );
@@ -222,7 +232,7 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                             <td className="absolute right-0 top-1/2 transform -translate-y-1/2 w-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <button
                                     onClick={() => handleDelete(rowIndex)}
-                                    className="text-red-500 hover:text-red-700"
+                                    className="text-red-500 dark:bg-white hover:dark:bg-slate-200 bg-stone-50 mr-2 p-2 rounded-full hover:text-red-700"
                                 >
                                     <FaTrashAlt className="text-lg" />
                                 </button>

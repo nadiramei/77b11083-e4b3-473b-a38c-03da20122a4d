@@ -70,13 +70,5 @@
     "position": "Graphic Designer",
     "phone": "555-8765",
     "email": "george.moore@example.com"
-  },
-  {
-    "id": 1726174455826,
-    "firstName": "Hannah",
-    "lastName": "Taylor",
-    "position": "Web Developer",
-    "phone": "555-9876",
-    "email": "hannah.taylor@example.com"
   }
 ]

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { FaLongArrowAltDown, FaLongArrowAltUp } from 'react-icons/fa';
+import { FaLongArrowAltDown, FaLongArrowAltUp, FaTrashAlt } from 'react-icons/fa';
 
 interface TableRow {
     id: number;
@@ -17,9 +17,10 @@ interface TableProps {
     setData: React.Dispatch<React.SetStateAction<TableRow[]>>;
     loadingCells: Set<string>;
     onErrorMessagesUpdate: (errorMessages: Map<string, string>) => void;
+    handleDelete: (rowIndex: number) => void;
 }
 
-const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessagesUpdate }) => {
+const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessagesUpdate, handleDelete }) => {
     const [sortedColumn, setSortedColumn] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [editingCell, setEditingCell] = useState<{ row: number; col: keyof TableRow } | null>(null);
@@ -175,7 +176,7 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                 </thead>
                 <tbody>
                     {data.map((row, rowIndex) => (
-                        <tr key={rowIndex} className="border border-gray-300 h-16">
+                        <tr key={rowIndex} className="border border-gray-300 h-16 group relative">
                             {(['firstName', 'lastName', 'position', 'phone', 'email'] as (keyof TableRow)[]).map((colKey) => {
                                 const cellId = getCellId(rowIndex, colKey);
                                 const cellColor = cellColors.get(cellId) || '';
@@ -218,6 +219,14 @@ const Table: React.FC<TableProps> = ({ data, setData, loadingCells, onErrorMessa
                                     </td>
                                 );
                             })}
+                            <td className="absolute right-0 top-1/2 transform -translate-y-1/2 w-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button
+                                    onClick={() => handleDelete(rowIndex)}
+                                    className="text-red-500 hover:text-red-700"
+                                >
+                                    <FaTrashAlt className="text-lg" />
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>

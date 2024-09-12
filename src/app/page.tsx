@@ -19,6 +19,48 @@ const Home: React.FC = () => {
     const [loadingCells, setLoadingCells] = useState<Set<string>>(new Set());
     const [errorMessages, setErrorMessages] = useState<Map<string, string>>(new Map());
 
+    const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+    const [rowToDelete, setRowToDelete] = useState<number | null>(null);
+    const [emailToDelete, setEmailToDelete] = useState<string | null>(null);
+
+    const handleDeleteClick = (rowIndex: number) => {
+        const rowEmail = data[rowIndex]?.email || '';
+        setRowToDelete(rowIndex);
+        setEmailToDelete(rowEmail);
+        setIsConfirmingDelete(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (rowToDelete !== null) {
+            try {
+                const response = await fetch('/api/delete-table-data', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rowIndex: rowToDelete }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete row');
+                }
+
+                setLocalData(prevData => prevData.filter((_, index) => index !== rowToDelete));
+                console.log('Row deleted successfully');
+            } catch (error) {
+                console.error('Error deleting row:', error);
+            }
+        }
+
+        setIsConfirmingDelete(false);
+        setRowToDelete(null);
+    };
+
+    const handleCancelDelete = () => {
+        setIsConfirmingDelete(false);
+        setRowToDelete(null);
+    };
+
     const handleErrorMessagesUpdate = (newErrorMessages: Map<string, string>) => {
         setErrorMessages(newErrorMessages);
     };
@@ -117,7 +159,6 @@ const Home: React.FC = () => {
         }
     };
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -147,7 +188,30 @@ const Home: React.FC = () => {
                     <FaArrowLeft className="text-lg" />
                 </button>
             </div>
-            <Table data={localData} setData={setLocalData} loadingCells={loadingCells} onErrorMessagesUpdate={handleErrorMessagesUpdate} />
+            <Table data={localData} setData={setLocalData} loadingCells={loadingCells} onErrorMessagesUpdate={handleErrorMessagesUpdate} handleDelete={handleDeleteClick} />
+
+            {isConfirmingDelete && (
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
+                    <div className="bg-white p-6 rounded shadow-lg">
+                        <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
+                        <p className="mb-4">Are you sure you want to delete the row with email address: <strong>{emailToDelete}</strong>? <br />This action cannot be undone.</p>
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={handleConfirmDelete}
+                                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                            >
+                                Confirm
+                            </button>
+                            <button
+                                onClick={handleCancelDelete}
+                                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
